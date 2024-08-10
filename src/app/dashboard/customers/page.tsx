@@ -1,5 +1,5 @@
+"use client";
 import * as React from 'react';
-import type { Metadata } from 'next';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -7,145 +7,181 @@ import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Downloa
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
 import dayjs from 'dayjs';
+import axios from 'axios';
+import { DataGrid, GridColDef, GridRenderCellParams, GridPaginationModel } from '@mui/x-data-grid';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
+import { useState } from 'react';
 
-import { config } from '@/config';
-import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
-import { CustomersTable } from '@/components/dashboard/customer/customers-table';
-import type { Customer } from '@/components/dashboard/customer/customers-table';
-
-export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
-
-const customers = [
-  {
-    id: 'USR-010',
-    name: 'Alcides Antonio',
-    avatar: '/assets/avatar-10.png',
-    email: 'alcides.antonio@devias.io',
-    phone: '908-691-3242',
-    address: { city: 'Madrid', country: 'Spain', state: 'Comunidad de Madrid', street: '4158 Hedge Street' },
-    createdAt: dayjs().subtract(2, 'hours').toDate(),
-  },
-  {
-    id: 'USR-009',
-    name: 'Marcus Finn',
-    avatar: '/assets/avatar-9.png',
-    email: 'marcus.finn@devias.io',
-    phone: '415-907-2647',
-    address: { city: 'Carson City', country: 'USA', state: 'Nevada', street: '2188 Armbrester Drive' },
-    createdAt: dayjs().subtract(2, 'hours').toDate(),
-  },
-  {
-    id: 'USR-008',
-    name: 'Jie Yan',
-    avatar: '/assets/avatar-8.png',
-    email: 'jie.yan.song@devias.io',
-    phone: '770-635-2682',
-    address: { city: 'North Canton', country: 'USA', state: 'Ohio', street: '4894 Lakeland Park Drive' },
-    createdAt: dayjs().subtract(2, 'hours').toDate(),
-  },
-  {
-    id: 'USR-007',
-    name: 'Nasimiyu Danai',
-    avatar: '/assets/avatar-7.png',
-    email: 'nasimiyu.danai@devias.io',
-    phone: '801-301-7894',
-    address: { city: 'Salt Lake City', country: 'USA', state: 'Utah', street: '368 Lamberts Branch Road' },
-    createdAt: dayjs().subtract(2, 'hours').toDate(),
-  },
-  {
-    id: 'USR-006',
-    name: 'Iulia Albu',
-    avatar: '/assets/avatar-6.png',
-    email: 'iulia.albu@devias.io',
-    phone: '313-812-8947',
-    address: { city: 'Murray', country: 'USA', state: 'Utah', street: '3934 Wildrose Lane' },
-    createdAt: dayjs().subtract(2, 'hours').toDate(),
-  },
-  {
-    id: 'USR-005',
-    name: 'Fran Perez',
-    avatar: '/assets/avatar-5.png',
-    email: 'fran.perez@devias.io',
-    phone: '712-351-5711',
-    address: { city: 'Atlanta', country: 'USA', state: 'Georgia', street: '1865 Pleasant Hill Road' },
-    createdAt: dayjs().subtract(2, 'hours').toDate(),
-  },
-
-  {
-    id: 'USR-004',
-    name: 'Penjani Inyene',
-    avatar: '/assets/avatar-4.png',
-    email: 'penjani.inyene@devias.io',
-    phone: '858-602-3409',
-    address: { city: 'Berkeley', country: 'USA', state: 'California', street: '317 Angus Road' },
-    createdAt: dayjs().subtract(2, 'hours').toDate(),
-  },
-  {
-    id: 'USR-003',
-    name: 'Carson Darrin',
-    avatar: '/assets/avatar-3.png',
-    email: 'carson.darrin@devias.io',
-    phone: '304-428-3097',
-    address: { city: 'Cleveland', country: 'USA', state: 'Ohio', street: '2849 Fulton Street' },
-    createdAt: dayjs().subtract(2, 'hours').toDate(),
-  },
-  {
-    id: 'USR-002',
-    name: 'Siegbert Gottfried',
-    avatar: '/assets/avatar-2.png',
-    email: 'siegbert.gottfried@devias.io',
-    phone: '702-661-1654',
-    address: { city: 'Los Angeles', country: 'USA', state: 'California', street: '1798 Hickory Ridge Drive' },
-    createdAt: dayjs().subtract(2, 'hours').toDate(),
-  },
-  {
-    id: 'USR-001',
-    name: 'Miron Vitold',
-    avatar: '/assets/avatar-1.png',
-    email: 'miron.vitold@devias.io',
-    phone: '972-333-4106',
-    address: { city: 'San Diego', country: 'USA', state: 'California', street: '75247' },
-    createdAt: dayjs().subtract(2, 'hours').toDate(),
-  },
-] satisfies Customer[];
+interface EstateCurrency {
+  id: string;
+  name: string;
+  symbol: string;
+  createdAt: string;
+}
 
 export default function Page(): React.JSX.Element {
-  const page = 0;
-  const rowsPerPage = 5;
+  const [currency, setCurrency] = React.useState<EstateCurrency[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [paginationModel, setPaginationModel] = React.useState<GridPaginationModel>({
+    pageSize: 5,
+    page: 0,
+  });
+  const [open, setOpen] = useState(false);
+  const [newCurrency, setNewCurrency] = useState({ name: '', symbol: '' });
+  const [editCurrency, setEditCurrency] = useState<EstateCurrency | null>(null);
 
-  const paginatedCustomers = applyPagination(customers, page, rowsPerPage);
+  React.useEffect(() => {
+    const fetchCurrencies = async () => {
+      try {
+        const response = await axios.get<EstateCurrency[]>('http://localhost:5224/api/EstateCurrency/list');
+        setCurrency(response.data);
+      } catch (error) {
+        console.error('Error fetching estate currencies:', error);
+      }
+    };
+
+    fetchCurrencies();
+  }, []);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const handleSubmit = async () => {
+    setLoading(true); // Set loading to true while submitting
+    try {
+      if (editCurrency) {
+        // Update existing currency
+        await axios.put(`http://localhost:5224/api/EstateCurrency/${editCurrency.id}`, {
+          ...newCurrency,
+          createdAt: editCurrency.createdAt,
+        });
+      } else {
+        // Add new currency
+        await axios.post('http://localhost:5224/api/EstateCurrency', {
+          ...newCurrency,
+          createdAt: new Date().toISOString(), // Example of setting createdAt
+        });
+      }
+
+      setNewCurrency({ name: '', symbol: '' }); // Clear form fields
+      setEditCurrency(null); // Reset editCurrency
+      setOpen(false); // Close modal
+      // Refresh the list
+      const response = await axios.get<EstateCurrency[]>('http://localhost:5224/api/EstateCurrency/list');
+      setCurrency(response.data);
+    } catch (error) {
+      console.error('Error adding/updating estate currency:', error);
+    } finally {
+      setLoading(false); // Set loading to false after submit attempt
+    }
+  };
+
+  const handleEdit = (currency: EstateCurrency) => {
+    setNewCurrency({ name: currency.name, symbol: currency.symbol });
+    setEditCurrency(currency);
+    setOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await axios.delete(`http://localhost:5224/api/EstateCurrency/${id}`);
+      // Refresh the list
+      const response = await axios.get<EstateCurrency[]>('http://localhost:5224/api/EstateCurrency/list');
+      setCurrency(response.data);
+    } catch (error) {
+      console.error('Error deleting estate currency:', error);
+    }
+  };
+
+  const columns: GridColDef[] = [
+    { field: 'name', headerName: 'Currency Name', width: 200 },
+    { field: 'symbol', headerName: 'Symbol', width: 100 },
+    {
+      field: 'createdAt',
+      headerName: 'Created At',
+      width: 200,
+      renderCell: (params: GridRenderCellParams) =>
+        dayjs(params.row.createdAt).format('DD/MM/YYYY HH:mm'),
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 200,
+      align: 'right',
+      renderCell: (params: GridRenderCellParams) => (
+        <Stack direction="row" spacing={3} justifyContent="right" >
+          <Button variant="contained" color="primary" onClick={() => handleEdit(params.row as EstateCurrency)}>
+            Düzenle
+          </Button>
+          <Button variant="contained" color="error" onClick={() => handleDelete(params.row.id)}>
+            Sil
+          </Button>
+        </Stack>
+      ),
+    },
+  ];
 
   return (
     <Stack spacing={3}>
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
-          <Typography variant="h4">Customers</Typography>
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
-              Import
-            </Button>
-            <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}>
-              Export
-            </Button>
-          </Stack>
+          <Typography variant="h4">Para Birimleri</Typography>
         </Stack>
         <div>
-          <Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
-            Add
+          <Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained" onClick={handleOpen}>
+            Ekle
           </Button>
         </div>
       </Stack>
-      <CustomersFilters />
-      <CustomersTable
-        count={paginatedCustomers.length}
-        page={page}
-        rows={paginatedCustomers}
-        rowsPerPage={rowsPerPage}
-      />
+
+      <div style={{ height: 400, width: '100%' }}>
+        <DataGrid
+          rows={currency}
+          columns={columns}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          getRowId={(row) => row.id}
+        />
+      </div>
+
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{editCurrency ? 'Para Birimini Düzenle' : 'Yeni Para Birimi Ekle'}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Currency Name"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={newCurrency.name}
+            onChange={(e) => setNewCurrency({ ...newCurrency, name: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            id="symbol"
+            label="Symbol"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={newCurrency.symbol}
+            onChange={(e) => setNewCurrency({ ...newCurrency, symbol: e.target.value })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            İptal
+          </Button>
+          <Button onClick={handleSubmit} color="success">
+            {editCurrency ? 'Güncelle' : 'Ekle'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
-}
-
-function applyPagination(rows: Customer[], page: number, rowsPerPage: number): Customer[] {
-  return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }

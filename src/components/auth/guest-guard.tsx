@@ -28,8 +28,15 @@ export function GuestGuard({ children }: GuestGuardProps): React.JSX.Element | n
     }
 
     if (user) {
-      logger.debug('[GuestGuard]: User is logged in, redirecting to dashboard');
-      router.replace(paths.dashboard.overview);
+      const role = localStorage.getItem("role");
+      if (role === 'admin') {
+        console.log("2");
+        router.replace(paths.dashboard.overview); // Admin kullanıcıları dashboard sayfasına yönlendirin
+      } else {
+        console.log("3");
+        router.replace(paths.dashboard.settings); // Normal kullanıcıları listeleme sayfasına yönlendirin
+      }
+
       return;
     }
 

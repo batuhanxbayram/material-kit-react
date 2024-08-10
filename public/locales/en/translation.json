@@ -1,0 +1,11 @@
+{
+  "overview": "Overview",
+  "currency": "Add Currency",
+  "status": "Add Estate Status",
+  "type": "Add Estate Type",
+  "account":"Account",
+  "totalUsers":"Total Users",
+  "totalEstates":"Total Estate",
+  "statusDistribution":"Estate Status Distribution"
+
+}

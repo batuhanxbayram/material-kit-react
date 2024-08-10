@@ -1,3 +1,5 @@
+
+import { Exclude, House, MoneyWavy, Warehouse } from '@phosphor-icons/react';
 import type { Icon } from '@phosphor-icons/react/dist/lib/types';
 import { ChartPie as ChartPieIcon } from '@phosphor-icons/react/dist/ssr/ChartPie';
 import { GearSix as GearSixIcon } from '@phosphor-icons/react/dist/ssr/GearSix';
@@ -13,4 +15,8 @@ export const navIcons = {
   'x-square': XSquare,
   user: UserIcon,
   users: UsersIcon,
+  money:MoneyWavy,
+  house:House,
+  status:Exclude,
+  type:Warehouse,
 } as Record<string, Icon>;

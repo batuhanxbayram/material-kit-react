@@ -10,17 +10,22 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { ArrowSquareUpRight as ArrowSquareUpRightIcon } from '@phosphor-icons/react/dist/ssr/ArrowSquareUpRight';
 import { CaretUpDown as CaretUpDownIcon } from '@phosphor-icons/react/dist/ssr/CaretUpDown';
+import house, { House } from '@mui/icons-material'
 
 import type { NavItemConfig } from '@/types/nav';
 import { paths } from '@/paths';
 import { isNavItemActive } from '@/lib/is-nav-item-active';
 import { Logo } from '@/components/core/logo';
+import { useTranslation } from 'react-i18next';
 
 import { navItems } from './config';
 import { navIcons } from './nav-icons';
+import '../../../translate/i18n'
 
 export function SideNav(): React.JSX.Element {
   const pathname = usePathname();
+
+
 
   return (
     <Box
@@ -52,9 +57,9 @@ export function SideNav(): React.JSX.Element {
     >
       <Stack spacing={2} sx={{ p: 3 }}>
         <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
-          <Logo color="light" height={32} width={122} />
+          { <Logo color="light" height={32} width={122} /> }
         </Box>
-        <Box
+        {/* <Box
           sx={{
             alignItems: 'center',
             backgroundColor: 'var(--mui-palette-neutral-950)',
@@ -74,14 +79,14 @@ export function SideNav(): React.JSX.Element {
             </Typography>
           </Box>
           <CaretUpDownIcon />
-        </Box>
+        </Box> */}
       </Stack>
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
       <Box component="nav" sx={{ flex: '1 1 auto', p: '12px' }}>
         {renderNavItems({ pathname, items: navItems })}
       </Box>
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
-      <Stack spacing={2} sx={{ p: '12px' }}>
+      {/* <Stack spacing={2} sx={{ p: '12px' }}>
         <div>
           <Typography color="var(--mui-palette-neutral-100)" variant="subtitle2">
             Need more features?
@@ -109,7 +114,7 @@ export function SideNav(): React.JSX.Element {
         >
           Pro version
         </Button>
-      </Stack>
+      </Stack> */}
     </Box>
   );
 }
@@ -137,6 +142,7 @@ interface NavItemProps extends Omit<NavItemConfig, 'items'> {
 function NavItem({ disabled, external, href, icon, matcher, pathname, title }: NavItemProps): React.JSX.Element {
   const active = isNavItemActive({ disabled, external, href, matcher, pathname });
   const Icon = icon ? navIcons[icon] : null;
+  const { t,i18n } = useTranslation();
 
   return (
     <li>
@@ -183,7 +189,7 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }: N
             component="span"
             sx={{ color: 'inherit', fontSize: '0.875rem', fontWeight: 500, lineHeight: '28px' }}
           >
-            {title}
+            {t(title ?? '')}
           </Typography>
         </Box>
       </Box>

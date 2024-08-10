@@ -1,6 +1,14 @@
 'use client';
 
 import type { User } from '@/types/user';
+import login from '../../services/AuthClient'
+
+interface SignInResponse {
+  token?: string;
+  refreshToken?: string;
+  role?: string;
+  error?: string;
+}
 
 function generateToken(): string {
   const arr = new Uint8Array(12);
@@ -38,9 +46,8 @@ export interface ResetPasswordParams {
 
 class AuthClient {
   async signUp(_: SignUpParams): Promise<{ error?: string }> {
-    // Make API request
 
-    // We do not handle the API, so we'll just generate a token and store it in localStorage.
+
     const token = generateToken();
     localStorage.setItem('custom-auth-token', token);
 
@@ -51,21 +58,28 @@ class AuthClient {
     return { error: 'Social authentication not implemented' };
   }
 
-  async signInWithPassword(params: SignInWithPasswordParams): Promise<{ error?: string }> {
+
+  async signInWithPassword(params: SignInWithPasswordParams): Promise<SignInResponse> {
     const { email, password } = params;
 
-    // Make API request
+    console.log("geldi");
+    const response = await login(email, password);
 
-    // We do not handle the API, so we'll check if the credentials match with the hardcoded ones.
-    if (email !== 'sofia@devias.io' || password !== 'Secret1') {
-      return { error: 'Invalid credentials' };
+    if (response && response.token && response.role) {
+      console.log('Login successful:', response);
+      // Token ve refresh token'ı local storage'a kaydedin
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      localStorage.setItem('role', response.role);
+
+      return {token: response.token, refreshToken: response.refreshToken, role: response.role };
+    } else {
+      return { error: 'Login failed' };
     }
 
-    const token = generateToken();
-    localStorage.setItem('custom-auth-token', token);
 
-    return {};
-  }
+
+}
 
   async resetPassword(_: ResetPasswordParams): Promise<{ error?: string }> {
     return { error: 'Password reset not implemented' };
@@ -79,7 +93,11 @@ class AuthClient {
     // Make API request
 
     // We do not handle the API, so just check if we have a token in localStorage.
-    const token = localStorage.getItem('custom-auth-token');
+
+
+
+    console.log("getuser")
+    const token = localStorage.getItem('token');
 
     if (!token) {
       return { data: null };
@@ -89,7 +107,11 @@ class AuthClient {
   }
 
   async signOut(): Promise<{ error?: string }> {
-    localStorage.removeItem('custom-auth-token');
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('role');
+
 
     return {};
   }

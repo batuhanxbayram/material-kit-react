@@ -1,0 +1,10 @@
+{
+  "overview": "Genel Bakış",
+  "currency": "Para Birimi Ekle",
+  "status": "Emlak Durumu Ekle",
+  "type": "Emlak Türü Ekle",
+  "account": "Hesap",
+  "totalUsers": "Toplam Kullanıcı Sayısı",
+  "totalEstates": "Toplam İlan Sayısı",
+  "statusDistribution": "Mülk Durum Dağılımı"
+}

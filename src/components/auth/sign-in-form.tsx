@@ -29,14 +29,14 @@ const schema = zod.object({
 
 type Values = zod.infer<typeof schema>;
 
-const defaultValues = { email: 'sofia@devias.io', password: 'Secret1' } satisfies Values;
+
 
 export function SignInForm(): React.JSX.Element {
   const router = useRouter();
 
   const { checkSession } = useUser();
 
-  const [showPassword, setShowPassword] = React.useState<boolean>();
+  const [showPassword, setShowPassword] = React.useState<boolean>(false);
 
   const [isPending, setIsPending] = React.useState<boolean>(false);
 
@@ -45,13 +45,13 @@ export function SignInForm(): React.JSX.Element {
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<Values>({ defaultValues, resolver: zodResolver(schema) });
+  } = useForm<Values>({ resolver: zodResolver(schema) });
 
   const onSubmit = React.useCallback(
     async (values: Values): Promise<void> => {
       setIsPending(true);
 
-      const { error } = await authClient.signInWithPassword(values);
+      const { token, role, error } = await authClient.signInWithPassword(values);
 
       if (error) {
         setError('root', { type: 'server', message: error });
@@ -65,6 +65,19 @@ export function SignInForm(): React.JSX.Element {
       // UserProvider, for this case, will not refresh the router
       // After refresh, GuestGuard will handle the redirect
       router.refresh();
+
+      console.log("bir");
+
+      // Kullanıcıyı rolüne göre yönlendir
+      if (role === 'admin') {
+        console.log("2");
+        router.push(paths.auth.resetPassword); // Admin kullanıcıları dashboard sayfasına yönlendirin
+      } else {
+        console.log("3");
+        router.push('/auth/sign-up'); // Normal kullanıcıları listeleme sayfasına yönlendirin
+      }
+
+
     },
     [checkSession, router, setError]
   );
@@ -72,11 +85,11 @@ export function SignInForm(): React.JSX.Element {
   return (
     <Stack spacing={4}>
       <Stack spacing={1}>
-        <Typography variant="h4">Sign in</Typography>
+        <Typography variant="h4">Giriş Yap</Typography>
         <Typography color="text.secondary" variant="body2">
-          Don&apos;t have an account?{' '}
+          Hesabın Var Mı?{' '}
           <Link component={RouterLink} href={paths.auth.signUp} underline="hover" variant="subtitle2">
-            Sign up
+            Kayıt Ol
           </Link>
         </Typography>
       </Stack>
@@ -88,7 +101,7 @@ export function SignInForm(): React.JSX.Element {
             render={({ field }) => (
               <FormControl error={Boolean(errors.email)}>
                 <InputLabel>Email address</InputLabel>
-                <OutlinedInput {...field} label="Email address" type="email" />
+                <OutlinedInput {...field} label="Eposta Adresi" type="email" />
                 {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
               </FormControl>
             )}
@@ -98,7 +111,7 @@ export function SignInForm(): React.JSX.Element {
             name="password"
             render={({ field }) => (
               <FormControl error={Boolean(errors.password)}>
-                <InputLabel>Password</InputLabel>
+                <InputLabel>Şifre</InputLabel>
                 <OutlinedInput
                   {...field}
                   endAdornment={
@@ -129,25 +142,16 @@ export function SignInForm(): React.JSX.Element {
           />
           <div>
             <Link component={RouterLink} href={paths.auth.resetPassword} variant="subtitle2">
-              Forgot password?
+              Şifremi Unuttum !
             </Link>
           </div>
           {errors.root ? <Alert color="error">{errors.root.message}</Alert> : null}
           <Button disabled={isPending} type="submit" variant="contained">
-            Sign in
+            Giriş Yap
           </Button>
         </Stack>
       </form>
-      <Alert color="warning">
-        Use{' '}
-        <Typography component="span" sx={{ fontWeight: 700 }} variant="inherit">
-          sofia@devias.io
-        </Typography>{' '}
-        with password{' '}
-        <Typography component="span" sx={{ fontWeight: 700 }} variant="inherit">
-          Secret1
-        </Typography>
-      </Alert>
+
     </Stack>
   );
 }

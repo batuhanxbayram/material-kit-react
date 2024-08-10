@@ -1,3 +1,4 @@
+"use client";
 import * as React from 'react';
 import type { Metadata } from 'next';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -9,20 +10,56 @@ import { LatestOrders } from '@/components/dashboard/overview/latest-orders';
 import { LatestProducts } from '@/components/dashboard/overview/latest-products';
 import { Sales } from '@/components/dashboard/overview/sales';
 import { TasksProgress } from '@/components/dashboard/overview/tasks-progress';
-import { TotalCustomers } from '@/components/dashboard/overview/total-customers';
+import { TotalCustomers } from '@/components/dashboard/overview/total-estate';
 import { TotalProfit } from '@/components/dashboard/overview/total-profit';
 import { Traffic } from '@/components/dashboard/overview/traffic';
+import axios from 'axios';
+import { useState } from 'react';
+import '../../translate/i18n';
+import { useTranslation } from 'react-i18next';
 
-export const metadata = { title: `Overview | Dashboard | ${config.site.name}` } satisfies Metadata;
+
 
 export default function Page(): React.JSX.Element {
+
+  const { i18n } = useTranslation();
+
+  const changeLanguage = (lng:string) => {
+    i18n.changeLanguage(lng);
+  };
+
+  const [totalEstate, setTotalEstate] = useState<string>('');
+  const [totalUser, setTotalUser] = useState<string>('');
+
+  React.useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const totalEstateresponse = await axios.get('http://localhost:5224/api/Estate/count');
+        setTotalEstate(totalEstateresponse.data);
+        const totalUserresponse = await axios.get("http://localhost:5224/api/Auth/count");
+        setTotalUser(totalUserresponse.data);
+
+      } catch (error) {
+        console.error('Error fetching estate statuses:', error);
+      }
+    };
+
+    fetchCount();
+  }, []);
+
+
   return (
     <Grid container spacing={3}>
+        <div>
+        <button onClick={() => changeLanguage('en')}>English</button>
+        <button onClick={() => changeLanguage('tr')}>Türkçe</button>
+        </div>
+
       <Grid lg={3} sm={6} xs={12}>
-        <Budget diff={12} trend="up" sx={{ height: '100%' }} value="$24k" />
+        <Budget diff={12} trend="up" sx={{ height: '100%' }} value={totalUser} />
       </Grid>
       <Grid lg={3} sm={6} xs={12}>
-        <TotalCustomers diff={16} trend="down" sx={{ height: '100%' }} value="1.6k" />
+        <TotalCustomers diff={16} trend="down" sx={{ height: '100%' }} value={totalEstate} />
       </Grid>
       <Grid lg={3} sm={6} xs={12}>
         <TasksProgress sx={{ height: '100%' }} value={75.5} />
@@ -40,7 +77,7 @@ export default function Page(): React.JSX.Element {
         />
       </Grid>
       <Grid lg={4} md={6} xs={12}>
-        <Traffic chartSeries={[63, 15, 22]} labels={['Desktop', 'Tablet', 'Phone']} sx={{ height: '100%' }} />
+        <Traffic  sx={{ height: '100%' }} />
       </Grid>
       <Grid lg={4} md={6} xs={12}>
         <LatestProducts

@@ -1,11 +1,17 @@
 import type { NavItemConfig } from '@/types/nav';
 import { paths } from '@/paths';
+import i18n from 'i18next';
+
+
+
+console.log(i18n.language);
+
+
 
 export const navItems = [
-  { key: 'overview', title: 'Overview', href: paths.dashboard.overview, icon: 'chart-pie' },
-  { key: 'customers', title: 'Customers', href: paths.dashboard.customers, icon: 'users' },
-  { key: 'integrations', title: 'Integrations', href: paths.dashboard.integrations, icon: 'plugs-connected' },
-  { key: 'settings', title: 'Settings', href: paths.dashboard.settings, icon: 'gear-six' },
-  { key: 'account', title: 'Account', href: paths.dashboard.account, icon: 'user' },
-  { key: 'error', title: 'Error', href: paths.errors.notFound, icon: 'x-square' },
+  { key: 'overview', title: 'overview', href: paths.dashboard.overview, icon: 'house' },
+  { key: 'customers', title: 'currency', href: paths.dashboard.customers, icon: 'money' },
+  { key: 'integrations', title: 'status', href: paths.dashboard.integrations, icon: 'status' },
+  { key: 'settings', title: 'type', href: paths.dashboard.settings, icon: 'type' },
+  { key: 'account', title: 'account', href: paths.dashboard.account, icon: 'user' },
 ] satisfies NavItemConfig[];
